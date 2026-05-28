@@ -1,3 +1,5 @@
+import numpy as np
+
 def W(r, h):
     """
     Función que calcula el valor del kernel.
@@ -9,7 +11,11 @@ def W(r, h):
     Returns (float):
     Devuelve el valor del kernel en un punto 
     """
-    pass
+    if 0 <= r <= h:
+        return (315 / (64*np.pi*h**9)) * (h**2 - r**2)**3
+    else:
+        return 0
+    
 
 def grad_W(r_vec, h):
     """
@@ -22,8 +28,11 @@ def grad_W(r_vec, h):
     Returns (np.ndarray):
     El gradiente de W
     """
-    pass
-
+    r = np.linalg.norm(r_vec)
+    if 0 <= r <= h:
+        return -(945 / (32*np.pi*h**9)) * (h**2 - r**2)**2 * r_vec
+    else:
+        return np.zeros(2)
 
 def lap_W(r, h):
     """
@@ -36,6 +45,10 @@ def lap_W(r, h):
     Returns (float):
     El Laplaciano de W
     """
-    pass
+    if 0 <= r <= h:
+        return -(945 / (32*np.pi*h**9)) * (h**2 - r**2) * (3*h**2 - 7*r**2)
+    else:
+        return 0
+    
 
 
