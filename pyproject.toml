@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+[project]
+name = "hpc-sim"
+version = "0.1.0"
+description = "Parallel SPH Fluid Simulation with ARM NEON Intrinsics on Apple M3"
+authors = [{name = "John Sebastian Mantilla", email = "johns.mantillam@konradlorenz.edu.co"}]
+requires-python = ">=3.10"
+dependencies = [
+    "numpy",
+    "pybind11",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+]
