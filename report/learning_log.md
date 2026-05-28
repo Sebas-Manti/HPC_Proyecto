@@ -21,3 +21,22 @@
 
 **Preguntas que quedaron abiertas:**
 - La lista final de librerías 
+
+## Fase 1 — Python naïve
+**Fecha: Mayo 17**
+
+**Qué hice:**
+- Implementé las funciones físicas para calculos Naive en python
+- Creé tests pytest para verificar las funciones
+- Creé la primera simulación para verificar que la fisica estuviera funcionando
+
+**Qué aprendí:**
+- pytest que no había usado antes
+- diferencia entre normalización 3D y 2D del kernel 
+
+
+**Qué me costó / qué no entendí bien:**
+- importe de modulos correctamente
+
+**Preguntas que quedaron abiertas:**
+- Visualización de la simulación dam break
