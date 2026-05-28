@@ -82,7 +82,7 @@ def step(positions, velocities, masses, h, dt, mu, k, rho0):
     F = compute_forces(positions, velocities, rho, masses, h, mu, k, rho0)
 
     for i in range(len(positions)):
-        velocities[i] = velocities[i] * dt + F[i]/rho[i]
+        velocities[i] = velocities[i] + dt * F[i]/rho[i]
         positions[i] = positions[i] + dt * velocities[i]
 
     for i in range(len(positions)):
