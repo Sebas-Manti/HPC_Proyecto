@@ -69,6 +69,7 @@
 - Aprendí a hacer el binding
 - Acualizar registros en cpp
 - Manejo de sintáxis cpp
+- estructura de arreglos SoA cpp pointers para actualizar directamente a registros vs arreglos python
 
 
 **Qué me costó / qué no entendí bien:**
@@ -77,3 +78,23 @@
 
 **Preguntas que quedaron abiertas:**
 - simulación dam break en hpc
+
+## Fase 4 — NEON C++
+**Fecha: Mayo 22**
+
+**Qué hice:**
+- Implementé las funciones físicas para calculos con neon
+- Creé benchmark para comparar los 4 métodos: navive vs hashed vs hpc vs neon
+
+**Qué aprendí:**
+- Aprendí a usar las funciones de intrinsics
+- Hacer el header en cpp
+- cómo usar las máscaras para condicionales, operaciones de registros contiguos duplicar sumar restar mla 
+
+
+**Qué me costó / qué no entendí bien:**
+- Aún me toca repasar todas las funciones del intrinsics que son bastantes
+
+
+**Preguntas que quedaron abiertas:**
+- simulación dam break en hpc y neon
