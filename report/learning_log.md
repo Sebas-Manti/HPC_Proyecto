@@ -57,3 +57,23 @@
 
 **Preguntas que quedaron abiertas:**
 - Visualización de la simulación dam break en hashed 
+
+## Fase 3 — hpc C++
+**Fecha: Mayo 18**
+
+**Qué hice:**
+- Implementé las funciones físicas para calculos hpc en c++
+- Creé benchmark para comparar los tres métodos: navive vs hashed vs hpc
+
+**Qué aprendí:**
+- Aprendí a hacer el binding
+- Acualizar registros en cpp
+- Manejo de sintáxis cpp
+
+
+**Qué me costó / qué no entendí bien:**
+- la actualización de los registros
+- manejo de funciones void en cpp
+
+**Preguntas que quedaron abiertas:**
+- simulación dam break en hpc
