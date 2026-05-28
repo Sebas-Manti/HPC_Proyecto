@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-```markdown
 # HPC SPH — Parallel Fluid Simulation with ARM NEON on Apple M3
 
 > Proyecto de grado — Seminario de Computación Científica II  
@@ -155,6 +153,4 @@ El informe completo del proyecto se encuentra en `report/`.
 **John Sebastian Mantilla** — johns.mantillam@konradlorenz.edu.co  
 Universidad Konrad Lorenz · Programa de Matemáticas
 ```
-=======
-# HPC_Proyecto
->>>>>>> efe828105e9c73b841c3cca7c2b31f0715b2f000
+
