@@ -40,3 +40,20 @@
 
 **Preguntas que quedaron abiertas:**
 - Visualización de la simulación dam break
+
+## Fase 2 — Python hashed
+**Fecha: Mayo 17**
+
+**Qué hice:**
+- Implementé las funciones físicas para calculos hashed en python
+- Creé benchmark para comparar naive vs hashed
+
+**Qué aprendí:**
+- defaultdict(list) no había usado antes de collections
+
+
+**Qué me costó / qué no entendí bien:**
+- un poco entender la vectorización en este contexto 
+
+**Preguntas que quedaron abiertas:**
+- Visualización de la simulación dam break en hashed 
