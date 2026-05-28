@@ -5,8 +5,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(Python3 REQUIRED COMPONENTS Interpreter Development)
 find_package(pybind11 REQUIRED)
 add_library(hpc_sph MODULE
+    src/cpp/sph_scalar.cpp
     src/cpp/bindings.cpp
 )
 target_link_libraries(hpc_sph PRIVATE pybind11::module)
 pybind11_extension(hpc_sph)
 pybind11_strip(hpc_sph)
+
