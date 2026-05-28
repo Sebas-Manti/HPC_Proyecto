@@ -6,23 +6,26 @@ def build_hash_table(positions, h):
         positions (np.ndarray, shape (N,2)): Posición de la partícula
         h (float): Radio de interacción
     
-    Returns (np.ndarray, shape (N,N)):
+    Returns (dict):
     Devuelve una tabla
     """
+    pass
 
 def query_neighbors(i, positions, hash_table, h):
     """ 
     Retorna los índices de vecinos de la partícula i
     
     Args: 
-        i (tuple): la partícula a calcular
+        i (int): la partícula a calcular
         positions (np.ndarray, shape (N,2)): Posición de la partícula
-        hash_table (np.ndarray, shape (N,N)): Referencia espacial de las partículas
+        hash_table (dict): Referencia espacial de las partículas
         h (float): Radio de interacción
     
-    Returns (np.ndarray, shape (N,N)):
+    Returns (np.ndarray, shape (M,)):
     Los vecinos de la partícula i
     """
+    pass
+
 def compute_density(positions, masses, h):
     """
     Función que calcula la densidad de una partícula con relación a sus vecinos.
@@ -36,6 +39,7 @@ def compute_density(positions, masses, h):
     Devuelve el valor de las densidades
     """
     pass
+
 def compute_forces(positions, velocities, densities, masses, h, mu, k, rho0):
     """
     Función que calcula las fuerzas con relación a sus vecinos.
@@ -54,6 +58,7 @@ def compute_forces(positions, velocities, densities, masses, h, mu, k, rho0):
     Calcula las fuerzas
     """
     pass
+
 def step(positions, velocities, masses, h, dt, mu, k, rho0):
     """
     Función que calcula los pasos con relación a sus vecinos.
