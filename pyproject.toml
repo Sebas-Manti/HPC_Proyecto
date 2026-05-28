@@ -2,7 +2,7 @@
 requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 [project]
-name = "hpc-sim"
+name = "hpc_sph"
 version = "0.1.0"
 description = "Parallel SPH Fluid Simulation with ARM NEON Intrinsics on Apple M3"
 authors = [{name = "John Sebastian Mantilla", email = "johns.mantillam@konradlorenz.edu.co"}]
