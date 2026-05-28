@@ -1,7 +1,7 @@
 # HPC SPH — Parallel Fluid Simulation with ARM NEON on Apple M3
 
-> Proyecto de grado — Seminario de Computación Científica II  
-> Universidad Konrad Lorenz · 8vo semestre · 2026-1
+> Proyecto de final de Semestre — Asignatura de Computación Científica II  
+> Universidad Konrad Lorenz
 
 Implementación de un simulador de fluidos basado en **Smoothed Particle Hydrodynamics (SPH)** con optimizaciones de alto rendimiento: paralelismo de datos mediante **ARM NEON SIMD intrinsics** y paralelismo de tareas con **OpenMP**, expuesto a Python a través de **pybind11**.
 
@@ -152,5 +152,4 @@ El informe completo del proyecto se encuentra en `report/`.
 
 **John Sebastian Mantilla** — johns.mantillam@konradlorenz.edu.co  
 Universidad Konrad Lorenz · Programa de Matemáticas
-```
 
