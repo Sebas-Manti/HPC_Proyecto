@@ -12,7 +12,7 @@ def W(r, h):
     Devuelve el valor del kernel en un punto 
     """
     if 0 <= r <= h:
-        return (315 / (64*np.pi*h**9)) * (h**2 - r**2)**3
+        return (4 / (np.pi * h**8)) * (h**2 - r**2)**3
     else:
         return 0
     
