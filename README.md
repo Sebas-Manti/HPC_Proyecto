@@ -227,4 +227,4 @@ Kernels utilizados:
 
 **John Sebastian Mantilla Manzano**  
 johns.mantillam@konradlorenz.edu.co  
-Scientific Computing 2 — 2026-I · Universidad Konrad Lorenz
+Scientific Computing 2 · Universidad Konrad Lorenz
