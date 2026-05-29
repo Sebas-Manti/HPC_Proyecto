@@ -1,143 +1,186 @@
-import numpy as np
-import os
 import sys
+import os
+import numpy as np
  
-_HAS_COLOUR = hasattr(sys.stdout, "isatty") and sys.stdout.isatty()
+_COLOUR = sys.stdout.isatty() and os.environ.get("TERM", "") != "dumb"
  
-_BLUE_RAMP = [17, 18, 19, 20, 21, 27, 33, 39, 45, 51]
+_RST = "\033[0m"
  
-def _fg(code: int, text: str) -> str:
-    if not _HAS_COLOUR:
-        return text
-    return f"\033[38;5;{code}m{text}\033[0m"
+def _ansi(code: str, text: str) -> str:
+    return f"\033[{code}m{text}{_RST}" if _COLOUR else text
  
-def _bold(text: str) -> str:
-    if not _HAS_COLOUR:
-        return text
-    return f"\033[1m{text}\033[0m"
- 
-def _dim(text: str) -> str:
-    if not _HAS_COLOUR:
-        return text
-    return f"\033[2m{text}\033[0m"
+_POP_COLOUR = {
+    0: "",          # space – never coloured
+    1: "2;34",      # dim blue
+    2: "34",        # blue
+    3: "1;36",      # bold cyan
+    4: "1;97",      # bold white
+}
  
 
-_CHARS_COLOUR  = ' ·░░▒▒▓▓█'
-_CHARS_PLAIN   = ' .,:;=+x#@'
- 
-def _density_char(count: int, max_count: int, palette: str) -> str:
-    if count == 0 or max_count == 0:
-        return palette[0]
-    frac = count / max_count
-    idx  = int(frac * (len(palette) - 1))
-    return palette[min(idx, len(palette) - 1)]
- 
-def _colour_for(count: int, max_count: int) -> int:
-    """Map density → blue ramp index."""
-    if count == 0 or max_count == 0:
-        return _BLUE_RAMP[0]
-    frac = count / max_count
-    idx  = int(frac * (len(_BLUE_RAMP) - 1))
-    return _BLUE_RAMP[min(idx, len(_BLUE_RAMP) - 1)]
- 
+_CHAR_TABLE = " '`-.|//,\\|\\_\\/#"
+assert len(_CHAR_TABLE) == 16
  
  
 def render(
     positions,
+    walls=None,
     velocities=None,
-    step: int = 0,
+    step: int  = 0,
     width: int  = 78,
-    height: int = 36,
+    height: int = 22,
     domain_x: tuple = (0.0, 1.0),
     domain_y: tuple = (0.0, 1.0),
     label: str = "",
 ) -> str:
-    """
-    Render SPH particles to an ASCII string.
- 
-    Parameters
-    ----------
-    positions  : (N, 2) array of float  – particle positions
-    velocities : (N, 2) array of float  – optional, used for stats only
-    step       : int                    – current simulation step
-    width      : int                    – inner grid width  (chars)
-    height     : int                    – inner grid height (rows)
-    domain_x   : (xmin, xmax)          – physical domain in x
-    domain_y   : (ymin, ymax)          – physical domain in y
-    label      : str                    – implementation name shown in header
-    """
-    positions = np.asarray(positions)
-    N = len(positions)
-    palette = _CHARS_COLOUR if _HAS_COLOUR else _CHARS_PLAIN
- 
+    positions = np.asarray(positions, dtype=float)
+    # Drop NaN/Inf particles (physics blow-up)
+    valid = np.isfinite(positions).all(axis=1)
+    positions = positions[valid]
+    N  = len(positions)
     xmin, xmax = domain_x
     ymin, ymax = domain_y
     dx = xmax - xmin or 1.0
     dy = ymax - ymin or 1.0
+
+    buf = np.zeros((height + 1, width + 1), dtype=np.uint8)
  
-    grid = np.zeros((height, width), dtype=np.int32)
+    vheight = height * 2
+ 
+    def _splat(pos, bit_pattern=0b1111):
+        """Write a particle's 4 bits into buf."""
+        col_f = (pos[0] - xmin) / dx * (width  - 1)
+        row_f = (1.0 - (pos[1] - ymin) / dy) * (vheight - 1)
+ 
+        if not (np.isfinite(col_f) and np.isfinite(row_f)):
+            return
+ 
+        col = int(col_f)
+        row = int(row_f) // 2 
+ 
+        if not (0 <= col < width - 1 and 0 <= row < height - 1):
+            return
+ 
+
+        sub = int(row_f) % 2
+ 
+        if sub == 0:
+            if bit_pattern & 0b1000: buf[row    ][col    ] |= 8
+            if bit_pattern & 0b0100: buf[row    ][col + 1] |= 4
+            if bit_pattern & 0b0010: buf[row + 1][col    ] |= 2
+            if bit_pattern & 0b0001: buf[row + 1][col + 1] |= 1
+        else:
+            if bit_pattern & 0b1000: buf[row + 1][col    ] |= 8
+            if bit_pattern & 0b0100: buf[row + 1][col + 1] |= 4
+            if bit_pattern & 0b0010: buf[row + 2][col    ] |= 2
+            if bit_pattern & 0b0001: buf[row + 2][col + 1] |= 1
+ 
     for pos in positions:
-        col = int((pos[0] - xmin) / dx * width)
-        row = int((1.0 - (pos[1] - ymin) / dy) * height)
-        if 0 <= col < width and 0 <= row < height:
-            grid[row, col] += 1
+        _splat(pos)
  
-    max_count = int(grid.max()) or 1
+    if walls is not None:
+        for pos in np.asarray(walls, dtype=float):
+            _splat(pos, 0b1111)
  
-    centroid = positions.mean(axis=0) if N else np.zeros(2)
-    if velocities is not None and len(velocities):
-        speeds   = np.linalg.norm(np.asarray(velocities), axis=1)
-        max_spd  = speeds.max()
-        mean_spd = speeds.mean()
-    else:
-        max_spd = mean_spd = 0.0
+    lines = []
  
-    total_w = width + 2
-    impl_tag = f" {label} " if label else ""
-    step_tag = f" step={step} "
-    n_tag    = f" N={N} "
-    title    = f"SPH Fluid{impl_tag}"
-    top_fill  = width - len(title) - len(step_tag) - len(n_tag)
-    top_left  = max(0, top_fill // 2)
-    top_right = max(0, top_fill - top_left)
- 
-    top_border = (
-        "╔"
-        + "═" * top_left
-        + _bold(title)
-        + "═" * top_right
-        + _dim(step_tag)
-        + _dim(n_tag)
-        + "╗"
-    )
- 
-    stats = (
-        f" cx={centroid[0]:.3f} cy={centroid[1]:.3f}"
-        f"  vmax={max_spd:.3f}  vmean={mean_spd:.3f}"
-        f"  peak={max_count}p/cell "
-    )
-    stats_padded = stats[:width].ljust(width)
-    bot_border   = "╚" + stats_padded + "╝"
- 
-    lines = [top_border]
+    # header bar
+    N_str     = f"N={N}"
+    step_str  = f"step={step:>4}"
+    impl_str  = f"[{label}]" if label else ""
+    title     = f" SPH Fluid  {impl_str}  {step_str}  {N_str} "
+    title_pad = title[:width].ljust(width)
+    lines.append(_ansi("1;44", title_pad))   
     for r in range(height):
         row_chars = []
         for c in range(width):
-            cnt  = grid[r, c]
-            ch   = _density_char(cnt, max_count, palette)
-            if _HAS_COLOUR and cnt > 0:
-                ch = _fg(_colour_for(cnt, max_count), ch)
+            val = int(buf[r][c])
+            ch  = _CHAR_TABLE[val]
+            if _COLOUR and val > 0:
+                pop  = bin(val).count('1')
+                code = _POP_COLOUR.get(pop, "34")
+                ch   = _ansi(code, ch)
             row_chars.append(ch)
-        lines.append("║" + "".join(row_chars) + "║")
+        lines.append("".join(row_chars))
  
-    lines.append(bot_border)
+    if velocities is not None and len(velocities):
+        spd = np.linalg.norm(np.asarray(velocities, dtype=float), axis=1)
+        stats = (f" cx={positions[:,0].mean():.3f}"
+                 f"  cy={positions[:,1].mean():.3f}"
+                 f"  vmax={spd.max():.3f}"
+                 f"  vmean={spd.mean():.3f} ")
+    else:
+        stats = (f" cx={positions[:,0].mean():.3f}"
+                 f"  cy={positions[:,1].mean():.3f} ")
+    stats_pad = stats[:width].ljust(width)
+    lines.append(_ansi("2;37", stats_pad))   # dim grey
+ 
     return "\n".join(lines)
  
  
+ 
+def load_scene(path: str, domain_x=(0.0, 1.0), domain_y=(0.0, 1.0)):
+    """
+    Parse an Endoh-style scene .txt file.
+ 
+    Returns
+    -------
+    fluid_pos : (N,2) float array   – initial fluid particle positions
+    wall_pos  : (M,2) float array   – wall particle positions
+    """
+    with open(path) as f:
+        raw_lines = f.read().splitlines()
+ 
+    if not raw_lines:
+        return np.zeros((0, 2)), np.zeros((0, 2))
+ 
+    nrows = len(raw_lines)
+    ncols = max(len(l) for l in raw_lines)
+ 
+    fluid, walls = [], []
+    xmin, xmax = domain_x
+    ymin, ymax = domain_y
+ 
+    for r, line in enumerate(raw_lines):
+        for c, ch in enumerate(line):
+            if ch == ' ':
+                continue
+            x = xmin + (c + 0.5) / ncols * (xmax - xmin)
+            y = ymax - (r + 0.5) / nrows * (ymax - ymin)
+            if ch == '#':
+                walls.append([x, y])
+            else:
+                fluid.append([x, y])
+ 
+    return (np.array(fluid, dtype=float) if fluid else np.zeros((0, 2)),
+            np.array(walls, dtype=float) if walls else np.zeros((0, 2)))
+ 
+ 
+ 
+def dam_break_scene(nx=15, ny=30, domain_x=(0.0, 1.0), domain_y=(0.0, 1.0)):
+    """
+    Classic dam-break: fluid column on the left, open right side.
+    Returns fluid_positions, wall_positions (empty – walls enforced by physics).
+    """
+    xmin, xmax = domain_x
+    ymin, ymax = domain_y
+    x = np.linspace(xmin + 0.02, xmin + (xmax - xmin) * 0.32, nx)
+    y = np.linspace(ymin + 0.02, ymin + (ymax - ymin) * 0.62, ny)
+    xx, yy = np.meshgrid(x, y)
+    return np.column_stack([xx.ravel(), yy.ravel()])
+ 
+ 
+ 
 def clear_screen():
-    """Clear terminal for live animation."""
-    if os.name == "nt":
-        os.system("cls")
-    else:
-        sys.stdout.write("\033[H")
+    sys.stdout.write("\033[H")
+    sys.stdout.flush()
+ 
+def hide_cursor():
+    if _COLOUR:
+        sys.stdout.write("\033[?25l")
+        sys.stdout.flush()
+ 
+def show_cursor():
+    if _COLOUR:
+        sys.stdout.write("\033[?25h")
         sys.stdout.flush()
