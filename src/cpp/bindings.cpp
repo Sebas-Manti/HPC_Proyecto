@@ -3,6 +3,7 @@
 
 void step(float*, float*, float*, float*, int, float, float, float, float, float, float);
 void step_neon(float*, float*, float*, float*, int, float, float, float, float, float, float);
+void step_neon_omp(float*, float*, float*, float*, int, float, float, float, float, float, float);
 
 namespace py = pybind11;
 
@@ -28,6 +29,16 @@ PYBIND11_MODULE(hpc_sph, m) {
         float* vy = vel_y.mutable_data();
         
         step_neon(p_x, p_y, vx, vy, N, mass, h, dt, mu, k, rho0);
+    });
+    m.def("step_neon_omp", [](py::array_t<float> pos_x, py::array_t<float>pos_y, py::array_t<float> vel_x, py::array_t<float> vel_y,
+            int N, float mass, float h, float dt, float mu, float k, float rho0) {
+        
+        float* p_x = pos_x.mutable_data();
+        float* p_y = pos_y.mutable_data();
+        float* vx = vel_x.mutable_data();
+        float* vy = vel_y.mutable_data();
+        
+        step_neon_omp(p_x, p_y, vx, vy, N, mass, h, dt, mu, k, rho0);
     });
 }
 
