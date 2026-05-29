@@ -34,7 +34,7 @@ def render(
     label: str = "",
 ) -> str:
     positions = np.asarray(positions, dtype=float)
-    # Drop NaN/Inf particles (physics blow-up)
+    
     valid = np.isfinite(positions).all(axis=1)
     positions = positions[valid]
     N  = len(positions)

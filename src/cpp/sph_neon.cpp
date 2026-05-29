@@ -31,7 +31,7 @@ void compute_density_neon(const float* pos_x, const float* pos_y, int N, float m
             w_val = vbslq_f32(mask, w_val, vdupq_n_f32(0.0f));
             acc = vaddq_f32(acc, w_val);
         }
-
+        rho[i] = vaddvq_f32(acc) * mass;
         for (; j < N; j++) {
             float dx = pos_x[i] - pos_x[j];
             float dy = pos_y[i] - pos_y[j];
